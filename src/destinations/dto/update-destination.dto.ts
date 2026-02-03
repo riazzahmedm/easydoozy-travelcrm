@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { IsEnum, IsOptional, IsString } from "class-validator";
+import { IsArray, IsEnum, IsOptional, IsString } from "class-validator";
 import { ContentStatus } from "@prisma/client";
 
 export class UpdateDestinationDto {
@@ -27,4 +27,9 @@ export class UpdateDestinationDto {
   @IsOptional()
   @IsEnum(ContentStatus)
   status?: ContentStatus;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  tagIds?: string[];
 }

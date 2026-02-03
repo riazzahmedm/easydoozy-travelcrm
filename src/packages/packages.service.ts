@@ -9,7 +9,20 @@ import { UpdatePackageDto } from "./dto/update-package.dto";
 
 @Injectable()
 export class PackagesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
+
+  private async validateTags(tagIds: string[], tenantId: string) {
+    const count = await this.prisma.tag.count({
+      where: {
+        id: { in: tagIds },
+        tenantId,
+      },
+    });
+
+    if (count !== tagIds.length) {
+      throw new BadRequestException("Invalid tags supplied");
+    }
+  }
 
   async create(dto: CreatePackageDto, tenantId: string) {
     // 1. Ensure destination exists and belongs to tenant
@@ -38,6 +51,10 @@ export class PackagesService {
       );
     }
 
+    if (dto.tagIds?.length) {
+      await this.validateTags(dto.tagIds, tenantId);
+    }
+
     return this.prisma.package.create({
       data: {
         name: dto.name,
@@ -48,6 +65,11 @@ export class PackagesService {
         destinationId: dto.destinationId,
         tenantId,
         status: dto.status ?? "DRAFT",
+        tags: dto.tagIds
+          ? {
+            connect: dto.tagIds.map((id) => ({ id })),
+          }
+          : undefined,
       },
     });
   }
@@ -87,9 +109,21 @@ export class PackagesService {
   async update(id: string, dto: UpdatePackageDto, tenantId: string) {
     const pkg = await this.findOne(id, tenantId);
 
+    if (dto.tagIds) {
+      await this.validateTags(dto.tagIds, tenantId);
+    }
+
+
     return this.prisma.package.update({
       where: { id: pkg.id },
-      data: dto,
+      data: {
+        ...dto,
+        tags: dto.tagIds
+          ? {
+            set: dto.tagIds.map((id) => ({ id })),
+          }
+          : undefined,
+      },
     });
   }
 

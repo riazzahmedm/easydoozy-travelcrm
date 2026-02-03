@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { ContentStatus } from "@prisma/client";
-import { IsOptional, IsString, IsNotEmpty, IsEnum } from "class-validator";
+import { IsOptional, IsString, IsNotEmpty, IsEnum, IsArray } from "class-validator";
 
 export class CreateDestinationDto {
   @ApiProperty({ example: "India" })
@@ -28,9 +28,13 @@ export class CreateDestinationDto {
   @IsString()
   description?: string;
 
-
   @ApiPropertyOptional({ enum: ContentStatus })
   @IsOptional()
   @IsEnum(ContentStatus)
   status?: ContentStatus;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  tagIds?: string[];
 }

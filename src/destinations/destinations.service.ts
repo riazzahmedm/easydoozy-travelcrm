@@ -9,7 +9,20 @@ import { UpdateDestinationDto } from "./dto/update-destination.dto";
 
 @Injectable()
 export class DestinationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
+
+  private async validateTags(tagIds: string[], tenantId: string) {
+    const count = await this.prisma.tag.count({
+      where: {
+        id: { in: tagIds },
+        tenantId,
+      },
+    });
+
+    if (count !== tagIds.length) {
+      throw new BadRequestException("Invalid tags supplied");
+    }
+  }
 
   async create(dto: CreateDestinationDto, tenantId: string) {
     // Slug uniqueness per tenant
@@ -26,12 +39,25 @@ export class DestinationsService {
       );
     }
 
+    if (dto.tagIds?.length) {
+      await this.validateTags(dto.tagIds, tenantId);
+    }
+
     return this.prisma.destination.create({
       data: {
-        ...dto,
-        status: dto.status ?? "DRAFT",
-        tenantId,
-      },
+      country: dto.country,
+      city: dto.city,
+      name: dto.name,
+      slug: dto.slug,
+      description: dto.description,
+      status: dto.status ?? "DRAFT",
+      tenantId,
+      tags: dto.tagIds
+        ? {
+            connect: dto.tagIds.map((id) => ({ id })),
+          }
+        : undefined,
+    },
     });
   }
 
@@ -61,9 +87,20 @@ export class DestinationsService {
   ) {
     const destination = await this.findOne(id, tenantId);
 
+    if (dto.tagIds) {
+    await this.validateTags(dto.tagIds, tenantId);
+  }
+
     return this.prisma.destination.update({
       where: { id: destination.id },
-      data: dto,
+      data: {
+      ...dto,
+      tags: dto.tagIds
+        ? {
+            set: dto.tagIds.map((id) => ({ id })),
+          }
+        : undefined,
+    },
     });
   }
 

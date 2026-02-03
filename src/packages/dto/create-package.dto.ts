@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import {
+  IsArray,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -42,4 +43,9 @@ export class CreatePackageDto {
   @IsOptional()
   @IsEnum(ContentStatus)
   status?: ContentStatus;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  tagIds?: string[];
 }
