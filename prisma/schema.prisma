@@ -56,6 +56,8 @@ model Destination {
   description String?
   status      ContentStatus @default(DRAFT)
 
+  tags        Tag[]
+
   packages    Package[]
 
   createdAt DateTime @default(now())
@@ -77,6 +79,25 @@ model Package {
   priceFrom    Float
   overview     String?
   status       ContentStatus @default(DRAFT)
+
+  tags        Tag[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, slug])
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  name      String
+  slug      String
+
+  destinations Destination[]
+  packages     Package[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
