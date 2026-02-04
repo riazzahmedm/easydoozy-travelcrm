@@ -21,6 +21,8 @@ model Tenant {
   color  String?
   status TenantStatus @default(ACTIVE)
 
+  subscription TenantSubscription?
+
   users        User[]
   destinations Destination[]
   packages     Package[]
@@ -165,6 +167,37 @@ model Media {
   @@index([tenantId])
 }
 
+model Plan {
+  id       String  @id @default(uuid())
+  name     String
+  code     String  @unique
+  isActive Boolean @default(true)
+
+  limits Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscriptions TenantSubscription[]
+}
+
+model TenantSubscription {
+  id       String @id @default(uuid())
+  tenantId String @unique
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  planId String
+  plan   Plan   @relation(fields: [planId], references: [id])
+
+  status SubscriptionStatus @default(ACTIVE)
+
+  startAt DateTime  @default(now())
+  endAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 enum UserRole {
   SUPER_ADMIN
   TENANT_ADMIN
@@ -184,4 +217,11 @@ enum ContentStatus {
 enum MediaType {
   IMAGE
   VIDEO
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIAL
+  EXPIRED
+  SUSPENDED
 }

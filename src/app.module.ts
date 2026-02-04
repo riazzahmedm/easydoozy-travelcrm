@@ -8,10 +8,13 @@ import { DestinationsModule } from './destinations/destinations.module';
 import { UsersModule } from './users/users.module';
 import { PackagesModule } from './packages/packages.module';
 import { TagsModule } from './tags/tags.module';
+import { PlansService } from './plans/plans.service';
+import { PlansController } from './plans/plans.controller';
+import { PlansModule } from './plans/plans.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, TenantsModule, DestinationsModule, UsersModule, PackagesModule, TagsModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [PrismaModule, AuthModule, TenantsModule, DestinationsModule, UsersModule, PackagesModule, TagsModule, PlansModule],
+  controllers: [AppController, PlansController],
+  providers: [AppService, PlansService],
 })
 export class AppModule {}
