@@ -2,12 +2,26 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import {
   IsArray,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
+  ValidateNested,
 } from "class-validator";
 import { ContentStatus } from "@prisma/client";
+import { Type } from "class-transformer";
+
+class CreateItineraryDayDto {
+  @IsInt()
+  dayNumber: number;
+
+  @IsString()
+  title: string;
+
+  @IsString()
+  description: string;
+}
 
 export class CreatePackageDto {
   @ApiProperty({ example: "Goa Honeymoon Package" })
@@ -33,6 +47,31 @@ export class CreatePackageDto {
   @IsOptional()
   @IsString()
   overview?: string;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  highlights?: string[];
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  inclusions?: string[];
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  exclusions?: string[];
+
+  @ApiPropertyOptional({ type: [CreateItineraryDayDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateItineraryDayDto)
+  itinerary?: CreateItineraryDayDto[];
 
   @ApiProperty({ example: "destination-uuid" })
   @IsString()

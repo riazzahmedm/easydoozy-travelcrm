@@ -26,9 +26,9 @@ export class PackagesController {
   constructor(private packagesService: PackagesService) {}
 
   @Post()
-  @Roles(UserRole.TENANT_ADMIN)
+  @Roles(UserRole.TENANT_ADMIN, UserRole.AGENT)
   create(@Body() dto: CreatePackageDto, @Req() req) {
-    return this.packagesService.create(dto, req.user.tenantId);
+    return this.packagesService.create(dto, req.user.tenantId, req.user.role);
   }
 
   @Get()
@@ -44,13 +44,13 @@ export class PackagesController {
   }
 
   @Patch(":id")
-  @Roles(UserRole.TENANT_ADMIN)
+  @Roles(UserRole.TENANT_ADMIN, UserRole.AGENT)
   update(
     @Param("id") id: string,
     @Body() dto: UpdatePackageDto,
     @Req() req
   ) {
-    return this.packagesService.update(id, dto, req.user.tenantId);
+    return this.packagesService.update(id, dto, req.user.tenantId, req.user.role);
   }
 
   @Delete(":id")

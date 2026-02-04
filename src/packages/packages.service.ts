@@ -1,11 +1,13 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreatePackageDto } from "./dto/create-package.dto";
 import { UpdatePackageDto } from "./dto/update-package.dto";
+import { UserRole } from "@prisma/client";
 
 @Injectable()
 export class PackagesService {
@@ -24,7 +26,7 @@ export class PackagesService {
     }
   }
 
-  async create(dto: CreatePackageDto, tenantId: string) {
+  async create(dto: CreatePackageDto, tenantId: string, role: UserRole) {
     // 1. Ensure destination exists and belongs to tenant
     const destination = await this.prisma.destination.findFirst({
       where: {
@@ -55,6 +57,9 @@ export class PackagesService {
       await this.validateTags(dto.tagIds, tenantId);
     }
 
+    const status =
+      role === UserRole.AGENT ? "DRAFT" : dto.status ?? "DRAFT";
+
     return this.prisma.package.create({
       data: {
         name: dto.name,
@@ -64,10 +69,22 @@ export class PackagesService {
         overview: dto.overview,
         destinationId: dto.destinationId,
         tenantId,
-        status: dto.status ?? "DRAFT",
+        status,
+        highlights: dto.highlights ?? [],
+        inclusions: dto.inclusions ?? [],
+        exclusions: dto.exclusions ?? [],
         tags: dto.tagIds
           ? {
             connect: dto.tagIds.map((id) => ({ id })),
+          }
+          : undefined,
+        itinerary: dto.itinerary
+          ? {
+            create: dto.itinerary.map(day => ({
+              dayNumber: day.dayNumber,
+              title: day.title,
+              description: day.description,
+            })),
           }
           : undefined,
       },
@@ -92,6 +109,9 @@ export class PackagesService {
             name: true,
             slug: true,
           },
+        },
+        itinerary: {
+          orderBy: { dayNumber: "asc" },
         },
       },
       orderBy: { createdAt: "desc" },
@@ -118,6 +138,9 @@ export class PackagesService {
             slug: true,
           },
         },
+        itinerary: {
+          orderBy: { dayNumber: "asc" },
+        },
       },
     });
 
@@ -129,21 +152,42 @@ export class PackagesService {
   }
 
 
-  async update(id: string, dto: UpdatePackageDto, tenantId: string) {
+  async update(id: string, dto: UpdatePackageDto, tenantId: string, role: UserRole) {
     const pkg = await this.findOne(id, tenantId);
 
     if (dto.tagIds) {
       await this.validateTags(dto.tagIds, tenantId);
     }
 
+    if (
+      role === UserRole.AGENT &&
+      dto.status === "PUBLISHED"
+    ) {
+      throw new ForbiddenException(
+        "Agents cannot publish packages"
+      );
+    }
 
     return this.prisma.package.update({
       where: { id: pkg.id },
       data: {
         ...dto,
+        highlights: dto.highlights,
+        inclusions: dto.inclusions,
+        exclusions: dto.exclusions,
         tags: dto.tagIds
           ? {
             set: dto.tagIds.map((id) => ({ id })),
+          }
+          : undefined,
+        itinerary: dto.itinerary
+          ? {
+            deleteMany: {},
+            create: dto.itinerary.map(day => ({
+              dayNumber: day.dayNumber,
+              title: day.title,
+              description: day.description,
+            })),
           }
           : undefined,
       },

@@ -26,9 +26,9 @@ export class DestinationsController {
   constructor(private destinationsService: DestinationsService) {}
 
   @Post()
-  @Roles(UserRole.TENANT_ADMIN)
+  @Roles(UserRole.TENANT_ADMIN, UserRole.AGENT)
   create(@Body() dto: CreateDestinationDto, @Req() req) {
-    return this.destinationsService.create(dto, req.user.tenantId);
+    return this.destinationsService.create(dto, req.user.tenantId, req.user.role);
   }
 
   @Get()
@@ -44,13 +44,13 @@ export class DestinationsController {
   }
 
   @Patch(":id")
-  @Roles(UserRole.TENANT_ADMIN)
+ @Roles(UserRole.TENANT_ADMIN, UserRole.AGENT)
   update(
     @Param("id") id: string,
     @Body() dto: UpdateDestinationDto,
     @Req() req
   ) {
-    return this.destinationsService.update(id, dto, req.user.tenantId);
+    return this.destinationsService.update(id, dto, req.user.tenantId, req.user.role);
   }
 
   @Delete(":id")

@@ -1,11 +1,13 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateDestinationDto } from "./dto/create-destination.dto";
 import { UpdateDestinationDto } from "./dto/update-destination.dto";
+import { UserRole } from "@prisma/client";
 
 @Injectable()
 export class DestinationsService {
@@ -24,7 +26,7 @@ export class DestinationsService {
     }
   }
 
-  async create(dto: CreateDestinationDto, tenantId: string) {
+  async create(dto: CreateDestinationDto, tenantId: string, role: UserRole) {
     // Slug uniqueness per tenant
     const existing = await this.prisma.destination.findFirst({
       where: {
@@ -43,6 +45,10 @@ export class DestinationsService {
       await this.validateTags(dto.tagIds, tenantId);
     }
 
+    const status =
+      role === UserRole.AGENT ? "DRAFT" : dto.status ?? "DRAFT";
+
+
     return this.prisma.destination.create({
       data: {
         country: dto.country,
@@ -50,7 +56,7 @@ export class DestinationsService {
         name: dto.name,
         slug: dto.slug,
         description: dto.description,
-        status: dto.status ?? "DRAFT",
+        status,
         tenantId,
         tags: dto.tagIds
           ? {
@@ -101,12 +107,22 @@ export class DestinationsService {
   async update(
     id: string,
     dto: UpdateDestinationDto,
-    tenantId: string
+    tenantId: string,
+    role: UserRole
   ) {
     const destination = await this.findOne(id, tenantId);
 
     if (dto.tagIds) {
       await this.validateTags(dto.tagIds, tenantId);
+    }
+
+    if (
+      role === UserRole.AGENT &&
+      dto.status === "PUBLISHED"
+    ) {
+      throw new ForbiddenException(
+        "Agents cannot publish destinations"
+      );
     }
 
     return this.prisma.destination.update({
