@@ -86,16 +86,38 @@ export class PackagesService {
             country: true,
           },
         },
+        tags: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
   }
 
+
   async findOne(id: string, tenantId: string) {
     const pkg = await this.prisma.package.findFirst({
       where: { id, tenantId },
       include: {
-        destination: true,
+        destination: {
+          select: {
+            id: true,
+            name: true,
+            city: true,
+            country: true,
+          },
+        },
+        tags: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
       },
     });
 
@@ -105,6 +127,7 @@ export class PackagesService {
 
     return pkg;
   }
+
 
   async update(id: string, dto: UpdatePackageDto, tenantId: string) {
     const pkg = await this.findOne(id, tenantId);

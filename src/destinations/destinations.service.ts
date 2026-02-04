@@ -45,25 +45,34 @@ export class DestinationsService {
 
     return this.prisma.destination.create({
       data: {
-      country: dto.country,
-      city: dto.city,
-      name: dto.name,
-      slug: dto.slug,
-      description: dto.description,
-      status: dto.status ?? "DRAFT",
-      tenantId,
-      tags: dto.tagIds
-        ? {
+        country: dto.country,
+        city: dto.city,
+        name: dto.name,
+        slug: dto.slug,
+        description: dto.description,
+        status: dto.status ?? "DRAFT",
+        tenantId,
+        tags: dto.tagIds
+          ? {
             connect: dto.tagIds.map((id) => ({ id })),
           }
-        : undefined,
-    },
+          : undefined,
+      },
     });
   }
 
   async findAll(tenantId: string) {
     return this.prisma.destination.findMany({
       where: { tenantId },
+      include: {
+        tags: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
   }
@@ -71,6 +80,15 @@ export class DestinationsService {
   async findOne(id: string, tenantId: string) {
     const destination = await this.prisma.destination.findFirst({
       where: { id, tenantId },
+      include: {
+        tags: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
     });
 
     if (!destination) {
@@ -88,19 +106,19 @@ export class DestinationsService {
     const destination = await this.findOne(id, tenantId);
 
     if (dto.tagIds) {
-    await this.validateTags(dto.tagIds, tenantId);
-  }
+      await this.validateTags(dto.tagIds, tenantId);
+    }
 
     return this.prisma.destination.update({
       where: { id: destination.id },
       data: {
-      ...dto,
-      tags: dto.tagIds
-        ? {
+        ...dto,
+        tags: dto.tagIds
+          ? {
             set: dto.tagIds.map((id) => ({ id })),
           }
-        : undefined,
-    },
+          : undefined,
+      },
     });
   }
 
