@@ -23,7 +23,7 @@ import { UserRole } from "@prisma/client";
 @UseGuards(AuthGuard("jwt"), RolesGuard)
 @Controller("packages")
 export class PackagesController {
-  constructor(private packagesService: PackagesService) {}
+  constructor(private packagesService: PackagesService) { }
 
   @Post()
   @Roles(UserRole.TENANT_ADMIN, UserRole.AGENT)
@@ -57,5 +57,17 @@ export class PackagesController {
   @Roles(UserRole.TENANT_ADMIN)
   remove(@Param("id") id: string, @Req() req) {
     return this.packagesService.remove(id, req.user.tenantId);
+  }
+
+  @Get("by-destination/:destinationId")
+  @Roles(UserRole.TENANT_ADMIN, UserRole.AGENT)
+  findByDestination(
+    @Param("destinationId") destinationId: string,
+    @Req() req
+  ) {
+    return this.packagesService.findByDestination(
+      destinationId,
+      req.user.tenantId
+    );
   }
 }

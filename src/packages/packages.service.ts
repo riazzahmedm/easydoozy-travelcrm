@@ -314,4 +314,58 @@ export class PackagesService {
       where: { id: pkg.id },
     });
   }
+
+  async findByDestination(
+    destinationId: string,
+    tenantId: string
+  ) {
+    // Ensure destination belongs to tenant
+    const destination = await this.prisma.destination.findFirst({
+      where: {
+        id: destinationId,
+        tenantId,
+      },
+      select: { id: true },
+    });
+
+    if (!destination) {
+      throw new NotFoundException("Destination not found");
+    }
+
+    return this.prisma.package.findMany({
+      where: {
+        tenantId,
+        destinationId,
+      },
+      include: {
+        destination: {
+          select: {
+            id: true,
+            name: true,
+            city: true,
+            country: true,
+          },
+        },
+        tags: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        coverImage: {
+          select: { url: true, altText: true },
+        },
+        media: {
+          orderBy: { order: "asc" },
+          select: { url: true, altText: true },
+        },
+        itinerary: {
+          orderBy: { dayNumber: "asc" },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
 }
