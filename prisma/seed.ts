@@ -7,7 +7,7 @@ async function main() {
   const email = "sadmin@easydoozy.com";
   const password = "Admin@123";
 
-  // 1. Ensure platform tenant exists
+  // Platform tenant
   let tenant = await prisma.tenant.findUnique({
     where: { slug: "platform" },
   });
@@ -17,26 +17,23 @@ async function main() {
       data: {
         name: "Platform",
         slug: "platform",
+        status: "ACTIVE",
       },
     });
   }
 
-  // 2. Prevent duplicate SUPER_ADMIN
   const existingAdmin = await prisma.user.findFirst({
-    where: {
-      role: UserRole.SUPER_ADMIN,
-    },
+    where: { role: UserRole.SUPER_ADMIN },
   });
 
   if (existingAdmin) {
-    console.log("SUPER_ADMIN already exists. Aborting.");
+    console.log("SUPER_ADMIN already exists");
     return;
   }
 
-  // 3. Create SUPER_ADMIN
   const hashedPassword = await bcrypt.hash(password, 12);
 
-  const admin = await prisma.user.create({
+  await prisma.user.create({
     data: {
       name: "Platform Admin",
       email,
@@ -46,7 +43,7 @@ async function main() {
     },
   });
 
-  console.log("SUPER_ADMIN created:", admin.email);
+  console.log("✅ SUPER_ADMIN created:", email);
 }
 
 main()

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -7,12 +8,27 @@ import * as bcrypt from "bcrypt";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateAgentDto } from "./dto/create-agent.dto";
 import { UserRole } from "@prisma/client";
+import { SubscriptionsService } from "src/subscriptions/subscriptions.service";
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private subscriptionService: SubscriptionsService) { }
 
   async createAgent(dto: CreateAgentDto, tenantId: string) {
+    // Check subscription & limits
+    const agentCount = await this.prisma.user.count({
+      where: {
+        tenantId,
+        role: UserRole.AGENT,
+      },
+    });
+
+    await this.subscriptionService.assertWithinLimit(
+      tenantId,
+      "maxAgents",
+      agentCount
+    );
+
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });

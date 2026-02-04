@@ -11,10 +11,13 @@ import { TagsModule } from './tags/tags.module';
 import { PlansService } from './plans/plans.service';
 import { PlansController } from './plans/plans.controller';
 import { PlansModule } from './plans/plans.module';
+import { SubscriptionsService } from './subscriptions/subscriptions.service';
+import { SubscriptionsController } from './subscriptions/subscriptions.controller';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, TenantsModule, DestinationsModule, UsersModule, PackagesModule, TagsModule, PlansModule],
-  controllers: [AppController, PlansController],
-  providers: [AppService, PlansService],
+  imports: [PrismaModule, AuthModule, TenantsModule, DestinationsModule, UsersModule, PackagesModule, TagsModule, PlansModule, SubscriptionsModule],
+  controllers: [AppController, PlansController, SubscriptionsController],
+  providers: [AppService, PlansService, SubscriptionsService],
 })
 export class AppModule {}

@@ -8,10 +8,11 @@ import { PrismaService } from "../prisma/prisma.service";
 import { CreateDestinationDto } from "./dto/create-destination.dto";
 import { UpdateDestinationDto } from "./dto/update-destination.dto";
 import { UserRole } from "@prisma/client";
+import { SubscriptionsService } from "src/subscriptions/subscriptions.service";
 
 @Injectable()
 export class DestinationsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService, private subscriptionService: SubscriptionsService) { }
 
   private async validateTags(tagIds: string[], tenantId: string) {
     const count = await this.prisma.tag.count({
@@ -88,6 +89,18 @@ export class DestinationsService {
 
 
   async create(dto: CreateDestinationDto, tenantId: string, role: UserRole) {
+
+    const destinationCount =
+      await this.prisma.destination.count({
+        where: { tenantId },
+      });
+
+    await this.subscriptionService.assertWithinLimit(
+      tenantId,
+      "maxDestinations",
+      destinationCount
+    );
+
     // Slug uniqueness per tenant
     const existing = await this.prisma.destination.findFirst({
       where: {

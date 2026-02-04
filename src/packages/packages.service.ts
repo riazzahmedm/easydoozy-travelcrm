@@ -8,10 +8,11 @@ import { PrismaService } from "../prisma/prisma.service";
 import { CreatePackageDto } from "./dto/create-package.dto";
 import { UpdatePackageDto } from "./dto/update-package.dto";
 import { UserRole } from "@prisma/client";
+import { SubscriptionsService } from "src/subscriptions/subscriptions.service";
 
 @Injectable()
 export class PackagesService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService, private subscriptionService: SubscriptionsService) { }
 
   private async validateTags(tagIds: string[], tenantId: string) {
     const count = await this.prisma.tag.count({
@@ -86,6 +87,17 @@ export class PackagesService {
   }
 
   async create(dto: CreatePackageDto, tenantId: string, role: UserRole) {
+    const packageCount =
+      await this.prisma.package.count({
+        where: { tenantId },
+      });
+
+    await this.subscriptionService.assertWithinLimit(
+      tenantId,
+      "maxPackages",
+      packageCount
+    );
+
     // 1. Ensure destination exists and belongs to tenant
     const destination = await this.prisma.destination.findFirst({
       where: {

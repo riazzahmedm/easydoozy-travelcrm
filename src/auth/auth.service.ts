@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
 import { PrismaService } from "../prisma/prisma.service";
@@ -20,8 +20,8 @@ export class AuthService {
       where: { email: dto.email },
       include: {
         tenant: {
-          select: {
-            status: true,
+          include: {
+            subscription: true,
           },
         },
       },
@@ -30,14 +30,30 @@ export class AuthService {
     if (!user || !user.isActive) {
       throw new UnauthorizedException("Invalid credentials");
     }
+    
+    if (user.role !== UserRole.SUPER_ADMIN) {
+      const subscription = user.tenant.subscription;
 
-    if (
-      user.role !== UserRole.SUPER_ADMIN &&
-      user.tenant.status !== "ACTIVE"
-    ) {
-      throw new UnauthorizedException(
-        "Tenant account is suspended"
-      );
+      if (!subscription) {
+        throw new ForbiddenException(
+          "No active subscription for this tenant"
+        );
+      }
+
+      if (
+        subscription.status !== "ACTIVE" &&
+        subscription.status !== "TRIAL"
+      ) {
+        throw new ForbiddenException(
+          "Tenant subscription is not active"
+        );
+      }
+
+      if (user.tenant.status !== "ACTIVE") {
+        throw new UnauthorizedException(
+          "Tenant account is suspended"
+        );
+      }
     }
 
     const isValid = await bcrypt.compare(dto.password, user.password);

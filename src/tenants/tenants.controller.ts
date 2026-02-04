@@ -16,7 +16,7 @@ import { UserRole } from "@prisma/client";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { Roles } from "src/common/decorators/roles.decorator";
 
-@ApiTags("Tenants (SUPER_ADMIN)")
+@ApiTags("Tenants")
 @ApiBearerAuth()
 @UseGuards(AuthGuard("jwt"), RolesGuard)
 @Roles(UserRole.SUPER_ADMIN)
