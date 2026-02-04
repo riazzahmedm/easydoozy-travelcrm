@@ -87,4 +87,22 @@ export class CreatePackageDto {
   @IsOptional()
   @IsArray()
   tagIds?: string[];
+
+  @ApiPropertyOptional({ example: "https://cdn.site.com/cover.jpg" })
+  @IsOptional()
+  @IsString()
+  coverImageUrl?: string;
+
+  @ApiPropertyOptional({
+    type: [String],
+    example: [
+      "https://cdn.site.com/img1.jpg",
+      "https://cdn.site.com/img2.jpg"
+    ]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  galleryUrls?: string[];
+
 }

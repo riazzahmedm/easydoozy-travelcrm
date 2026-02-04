@@ -26,6 +26,67 @@ export class DestinationsService {
     }
   }
 
+  private async createCoverImage(
+    tenantId: string,
+    destinationId: string,
+    url: string
+  ) {
+    const destination = await this.prisma.destination.findUnique({
+      where: { id: destinationId },
+      select: { coverImageId: true },
+    });
+
+    if (destination?.coverImageId) {
+      await this.prisma.media.delete({
+        where: { id: destination.coverImageId },
+      });
+    }
+
+    const media = await this.prisma.media.create({
+      data: {
+        tenantId,
+        url,
+        order: 0,
+      },
+    });
+
+    await this.prisma.destination.update({
+      where: { id: destinationId },
+      data: {
+        coverImage: {
+          connect: { id: media.id },
+        },
+      },
+    });
+  }
+
+
+  private async replaceGallery(
+    tenantId: string,
+    destinationId: string,
+    urls: string[]
+  ) {
+    await this.prisma.media.deleteMany({
+      where: {
+        tenantId,
+        destinationId,
+        NOT: {
+          destinationCover: { isNot: null },
+        },
+      },
+    });
+
+    await this.prisma.media.createMany({
+      data: urls.map((url, index) => ({
+        tenantId,
+        url,
+        order: index,
+        destinationId,
+      })),
+    });
+  }
+
+
   async create(dto: CreateDestinationDto, tenantId: string, role: UserRole) {
     // Slug uniqueness per tenant
     const existing = await this.prisma.destination.findFirst({
@@ -49,7 +110,7 @@ export class DestinationsService {
       role === UserRole.AGENT ? "DRAFT" : dto.status ?? "DRAFT";
 
 
-    return this.prisma.destination.create({
+    const destination = await this.prisma.destination.create({
       data: {
         country: dto.country,
         city: dto.city,
@@ -65,6 +126,24 @@ export class DestinationsService {
           : undefined,
       },
     });
+
+    if (dto.coverImageUrl) {
+      await this.createCoverImage(
+        tenantId,
+        destination.id,
+        dto.coverImageUrl
+      );
+    }
+
+    if (dto.galleryUrls?.length) {
+      await this.replaceGallery(
+        tenantId,
+        destination.id,
+        dto.galleryUrls
+      );
+    }
+
+    return destination;
   }
 
   async findAll(tenantId: string) {
@@ -77,6 +156,13 @@ export class DestinationsService {
             name: true,
             slug: true,
           },
+        },
+        coverImage: {
+          select: { url: true, altText: true },
+        },
+        media: {
+          orderBy: { order: "asc" },
+          select: { url: true, altText: true },
         },
       },
       orderBy: { createdAt: "desc" },
@@ -93,6 +179,13 @@ export class DestinationsService {
             name: true,
             slug: true,
           },
+        },
+        coverImage: {
+          select: { url: true, altText: true },
+        },
+        media: {
+          orderBy: { order: "asc" },
+          select: { url: true, altText: true },
         },
       },
     });
@@ -125,10 +218,14 @@ export class DestinationsService {
       );
     }
 
-    return this.prisma.destination.update({
+    const updated = this.prisma.destination.update({
       where: { id: destination.id },
       data: {
-        ...dto,
+        name: dto.name,
+        country: dto.country,
+        city: dto.city,
+        description: dto.description,
+        status: dto.status,
         tags: dto.tagIds
           ? {
             set: dto.tagIds.map((id) => ({ id })),
@@ -136,6 +233,24 @@ export class DestinationsService {
           : undefined,
       },
     });
+
+    if (dto.coverImageUrl) {
+      await this.createCoverImage(
+        tenantId,
+        destination.id,
+        dto.coverImageUrl
+      );
+    }
+
+    if (dto.galleryUrls) {
+      await this.replaceGallery(
+        tenantId,
+        destination.id,
+        dto.galleryUrls
+      );
+    }
+
+    return updated;
   }
 
   async remove(id: string, tenantId: string) {

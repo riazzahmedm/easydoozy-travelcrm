@@ -28,6 +28,7 @@ model Tenant {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  media     Media[]
 }
 
 model User {
@@ -57,8 +58,12 @@ model Destination {
   description String?
   status      ContentStatus @default(DRAFT)
 
-  tags Tag[]
+  coverImageId String? @unique
+  coverImage   Media?  @relation("DestinationCover", fields: [coverImageId], references: [id])
 
+  media Media[] @relation("DestinationMedia")
+
+  tags     Tag[]
   packages Package[]
 
   createdAt DateTime @default(now())
@@ -84,6 +89,11 @@ model Package {
   highlights String[]
   inclusions String[]
   exclusions String[]
+
+  coverImageId String? @unique
+  coverImage   Media?  @relation("PackageCover", fields: [coverImageId], references: [id])
+
+  media Media[] @relation("PackageMedia")
 
   itinerary ItineraryDay[]
 
@@ -127,6 +137,31 @@ model ItineraryDay {
   @@unique([packageId, dayNumber])
 }
 
+model Media {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  url     String
+  altText String?
+  type    MediaType @default(IMAGE)
+  order   Int       @default(0)
+
+  destinationCover Destination? @relation("DestinationCover")
+  packageCover     Package?     @relation("PackageCover")
+
+  destinationId String?
+  destination   Destination? @relation("DestinationMedia", fields: [destinationId], references: [id], onDelete: Cascade)
+
+  packageId String?
+  package   Package? @relation("PackageMedia", fields: [packageId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
 enum UserRole {
   SUPER_ADMIN
   TENANT_ADMIN
@@ -141,4 +176,9 @@ enum TenantStatus {
 enum ContentStatus {
   DRAFT
   PUBLISHED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
 }

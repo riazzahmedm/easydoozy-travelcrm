@@ -26,6 +26,65 @@ export class PackagesService {
     }
   }
 
+  private async createCoverImage(
+    tenantId: string,
+    packageId: string,
+    url: string
+  ) {
+    const pkg = await this.prisma.package.findUnique({
+      where: { id: packageId },
+      select: { coverImageId: true },
+    });
+
+    if (pkg?.coverImageId) {
+      await this.prisma.media.delete({
+        where: { id: pkg.coverImageId },
+      });
+    }
+
+    const media = await this.prisma.media.create({
+      data: {
+        tenantId,
+        url,
+        order: 0,
+      },
+    });
+
+    await this.prisma.package.update({
+      where: { id: packageId },
+      data: {
+        coverImage: {
+          connect: { id: media.id },
+        },
+      },
+    });
+  }
+
+  private async replaceGallery(
+    tenantId: string,
+    packageId: string,
+    urls: string[]
+  ) {
+    await this.prisma.media.deleteMany({
+      where: {
+        tenantId,
+        packageId,
+        NOT: {
+          packageCover: { isNot: null },
+        },
+      },
+    });
+
+    await this.prisma.media.createMany({
+      data: urls.map((url, index) => ({
+        tenantId,
+        url,
+        order: index,
+        packageId,
+      })),
+    });
+  }
+
   async create(dto: CreatePackageDto, tenantId: string, role: UserRole) {
     // 1. Ensure destination exists and belongs to tenant
     const destination = await this.prisma.destination.findFirst({
@@ -60,7 +119,7 @@ export class PackagesService {
     const status =
       role === UserRole.AGENT ? "DRAFT" : dto.status ?? "DRAFT";
 
-    return this.prisma.package.create({
+    const pkg = await this.prisma.package.create({
       data: {
         name: dto.name,
         slug: dto.slug,
@@ -89,6 +148,24 @@ export class PackagesService {
           : undefined,
       },
     });
+
+    if (dto.coverImageUrl) {
+      await this.createCoverImage(
+        tenantId,
+        pkg.id,
+        dto.coverImageUrl
+      );
+    }
+
+    if (dto.galleryUrls?.length) {
+      await this.replaceGallery(
+        tenantId,
+        pkg.id,
+        dto.galleryUrls
+      );
+    }
+
+    return pkg;
   }
 
   async findAll(tenantId: string) {
@@ -109,6 +186,13 @@ export class PackagesService {
             name: true,
             slug: true,
           },
+        },
+        coverImage: {
+          select: { url: true, altText: true },
+        },
+        media: {
+          orderBy: { order: "asc" },
+          select: { url: true, altText: true },
         },
         itinerary: {
           orderBy: { dayNumber: "asc" },
@@ -137,6 +221,13 @@ export class PackagesService {
             name: true,
             slug: true,
           },
+        },
+        coverImage: {
+          select: { url: true, altText: true },
+        },
+        media: {
+          orderBy: { order: "asc" },
+          select: { url: true, altText: true },
         },
         itinerary: {
           orderBy: { dayNumber: "asc" },
@@ -168,10 +259,14 @@ export class PackagesService {
       );
     }
 
-    return this.prisma.package.update({
+    const updated = this.prisma.package.update({
       where: { id: pkg.id },
       data: {
-        ...dto,
+        name: dto.name,
+        duration: dto.duration,
+        priceFrom: dto.priceFrom,
+        overview: dto.overview,
+        status: dto.status,
         highlights: dto.highlights,
         inclusions: dto.inclusions,
         exclusions: dto.exclusions,
@@ -192,6 +287,24 @@ export class PackagesService {
           : undefined,
       },
     });
+
+    if (dto.coverImageUrl) {
+      await this.createCoverImage(
+        tenantId,
+        pkg.id,
+        dto.coverImageUrl
+      );
+    }
+
+    if (dto.galleryUrls) {
+      await this.replaceGallery(
+        tenantId,
+        pkg.id,
+        dto.galleryUrls
+      );
+    }
+
+    return updated;
   }
 
   async remove(id: string, tenantId: string) {
