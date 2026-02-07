@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards, Req } from "@nestjs/common";
+import { Controller, Post, Body, Get, UseGuards, Req, Res } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
@@ -12,8 +12,19 @@ export class AuthController {
   constructor(private authService: AuthService) { }
 
   @Post("login")
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res
+  ) {
+    const { accessToken } = await this.authService.login(dto);
+    res.cookie("access_token", accessToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+      path: "/",
+    });
+
+    return { success: true };
   }
 
   @UseGuards(AuthGuard("jwt"))

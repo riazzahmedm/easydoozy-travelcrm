@@ -1,7 +1,9 @@
+import "dotenv/config";
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import cookieParser from "cookie-parser";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,8 +13,11 @@ async function bootstrap() {
       .map((origin) => origin.trim())
       .filter(Boolean) ?? [];
 
+  const resolvedCorsOrigins =
+    corsOrigins.length > 0 ? corsOrigins : ["http://localhost:3001"];
+
   app.enableCors({
-    origin: corsOrigins.length > 0 ? corsOrigins : false,
+    origin: resolvedCorsOrigins,
     credentials: true,
   });
 
@@ -33,6 +38,8 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
+
+  app.use(cookieParser()); 
 
   await app.listen(3000);
 }
