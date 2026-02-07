@@ -43,4 +43,13 @@ export class AuthController {
   resetPassword(@Body() dto: ResetPasswordDto, @Req() req) {
     return this.authService.resetPassword(dto, req.tenantId);
   }
+
+  @Post("logout")
+  logout(@Res({ passthrough: true }) res) {
+    res.clearCookie("access_token", {
+      path: "/",
+    });
+
+    return { success: true };
+  }
 }
