@@ -7,7 +7,7 @@ import {
   Post,
   UseGuards,
 } from "@nestjs/common";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
 import { PlansService } from "./plans.service";
 import { CreatePlanDto } from "./dto/create-plan.dto";
 import { UpdatePlanDto } from "./dto/update-plan.dto";
@@ -17,7 +17,7 @@ import { Roles } from "../common/decorators/roles.decorator";
 import { UserRole } from "@prisma/client";
 
 @ApiTags("Plans")
-@ApiBearerAuth()
+@ApiCookieAuth()
 @UseGuards(AuthGuard("jwt"), RolesGuard)
 @Controller("plans")
 @Roles(UserRole.SUPER_ADMIN)

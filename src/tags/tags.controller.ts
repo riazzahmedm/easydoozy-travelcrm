@@ -9,7 +9,7 @@ import {
   Req,
   UseGuards,
 } from "@nestjs/common";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
 import { TagsService } from "./tags.service";
 import { CreateTagDto } from "./dto/create-tag.dto";
 import { UpdateTagDto } from "./dto/update-tag.dto";
@@ -19,7 +19,7 @@ import { Roles } from "../common/decorators/roles.decorator";
 import { UserRole } from "@prisma/client";
 
 @ApiTags("Tags")
-@ApiBearerAuth()
+@ApiCookieAuth()
 @UseGuards(AuthGuard("jwt"), RolesGuard)
 @Controller("tags")
 export class TagsController {

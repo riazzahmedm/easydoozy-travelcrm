@@ -33,7 +33,7 @@ async function bootstrap() {
     .setTitle('Travel CRM API')
     .setDescription('API documentation for Travel CRM backend')
     .setVersion('1.0')
-    .addBearerAuth() // JWT ready
+    .addCookieAuth("access_token")
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

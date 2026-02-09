@@ -7,7 +7,7 @@ import {
   Post,
   UseGuards,
 } from "@nestjs/common";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
 import { TenantsService } from "./tenants.service";
 import { CreateTenantDto } from "./dto/create-tenant.dto";
 import { UpdateTenantStatusDto } from "./dto/update-tenant-status.dto";
@@ -17,7 +17,7 @@ import { RolesGuard } from "src/common/guards/roles.guard";
 import { Roles } from "src/common/decorators/roles.decorator";
 
 @ApiTags("Tenants")
-@ApiBearerAuth()
+@ApiCookieAuth()
 @UseGuards(AuthGuard("jwt"), RolesGuard)
 @Roles(UserRole.SUPER_ADMIN)
 @Controller("tenants")
@@ -32,6 +32,11 @@ export class TenantsController {
   @Get()
   listTenants() {
     return this.tenantsService.findAllTenants();
+  }
+
+  @Get(":id")
+  getTenant(@Param("id") tenantId: string) {
+    return this.tenantsService.findTenantById(tenantId);
   }
 
   @Patch(":id/status")

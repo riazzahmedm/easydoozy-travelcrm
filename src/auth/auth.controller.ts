@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Get, UseGuards, Req, Res } from "@nestjs/common";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
 import { AuthGuard } from "@nestjs/passport";
@@ -28,7 +28,7 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard("jwt"))
-  @ApiBearerAuth()
+  @ApiCookieAuth()
   @Get("me")
   me(@Req() req) {
     return req.user;

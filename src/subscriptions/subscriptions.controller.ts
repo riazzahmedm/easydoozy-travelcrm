@@ -7,7 +7,7 @@ import {
   Post,
   UseGuards,
 } from "@nestjs/common";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
 import { SubscriptionsService } from "./subscriptions.service";
 import { AssignSubscriptionDto } from "./dto/assign-subscription.dto";
 import { UpdateSubscriptionStatusDto } from "./dto/update-subscription-status.dto";
@@ -17,7 +17,7 @@ import { Roles } from "../common/decorators/roles.decorator";
 import { UserRole } from "@prisma/client";
 
 @ApiTags("Tenant Subscriptions")
-@ApiBearerAuth()
+@ApiCookieAuth()
 @UseGuards(AuthGuard("jwt"), RolesGuard)
 @Roles(UserRole.SUPER_ADMIN)
 @Controller("subscriptions")

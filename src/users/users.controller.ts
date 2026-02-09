@@ -8,7 +8,7 @@ import {
   Req,
   UseGuards,
 } from "@nestjs/common";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
 import { UsersService } from "./users.service";
 import { CreateAgentDto } from "./dto/create-agent.dto";
 import { UpdateAgentStatusDto } from "./dto/update-agent-status.dto";
@@ -18,7 +18,7 @@ import { Roles } from "../common/decorators/roles.decorator";
 import { UserRole } from "@prisma/client";
 
 @ApiTags("Users (Agents)")
-@ApiBearerAuth()
+@ApiCookieAuth()
 @UseGuards(AuthGuard("jwt"), RolesGuard)
 @Roles(UserRole.TENANT_ADMIN)
 @Controller("users")

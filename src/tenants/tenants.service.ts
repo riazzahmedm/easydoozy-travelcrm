@@ -79,6 +79,27 @@ export class TenantsService {
     });
   }
 
+  async findTenantById(tenantId: string) {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      include: {
+        _count: {
+          select: {
+            users: true,
+            destinations: true,
+            packages: true,
+          },
+        },
+      },
+    });
+
+    if (!tenant) {
+      throw new NotFoundException("Tenant not found");
+    }
+
+    return tenant;
+  }
+
   async updateTenantStatus(tenantId: string, status: TenantStatus) {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
