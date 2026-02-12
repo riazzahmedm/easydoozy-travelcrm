@@ -10,7 +10,7 @@ import { TenantStatus, UserRole } from "@prisma/client";
 
 @Injectable()
 export class TenantsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async createTenantWithAdmin(dto: CreateTenantDto) {
     // 1. Check tenant slug uniqueness
@@ -45,7 +45,7 @@ export class TenantsService {
 
       const admin = await tx.user.create({
         data: {
-          name: dto.adminName,   
+          name: dto.adminName,
           email: dto.adminEmail,
           password: hashedPassword,
           role: UserRole.TENANT_ADMIN,
@@ -83,6 +83,11 @@ export class TenantsService {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
       include: {
+        subscription: {
+          include: {
+            plan: true,
+          },
+        },
         _count: {
           select: {
             users: true,
