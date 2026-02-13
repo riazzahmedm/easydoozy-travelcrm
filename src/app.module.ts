@@ -14,10 +14,13 @@ import { PlansModule } from './plans/plans.module';
 import { SubscriptionsService } from './subscriptions/subscriptions.service';
 import { SubscriptionsController } from './subscriptions/subscriptions.controller';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { TenantDashboardModule } from './tenant-dashboard/tenant-dashboard.module';
+import { PlatformDashboardService } from './platform-dashboard/platform-dashboard.service';
+import { PlatformDashboardModule } from './platform-dashboard/platform-dashboard.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, TenantsModule, DestinationsModule, UsersModule, PackagesModule, TagsModule, PlansModule, SubscriptionsModule],
+  imports: [PrismaModule, AuthModule, TenantsModule, DestinationsModule, UsersModule, PackagesModule, TagsModule, PlansModule, SubscriptionsModule, TenantDashboardModule, PlatformDashboardModule],
   controllers: [AppController, PlansController, SubscriptionsController],
-  providers: [AppService, PlansService, SubscriptionsService],
+  providers: [AppService, PlansService, SubscriptionsService, PlatformDashboardService],
 })
 export class AppModule {}
