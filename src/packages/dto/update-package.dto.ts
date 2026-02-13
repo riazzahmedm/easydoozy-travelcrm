@@ -67,6 +67,10 @@ export class UpdatePackageDto {
   @IsArray()
   tagIds?: string[];
 
+  @ApiPropertyOptional({ example: "destination-uuid" })
+  @IsString()
+  destinationId: string;
+
   @ApiPropertyOptional({ example: "https://cdn.site.com/cover.jpg" })
   @IsOptional()
   @IsString()

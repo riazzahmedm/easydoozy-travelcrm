@@ -271,6 +271,20 @@ export class PackagesService {
       );
     }
 
+    // Validate destination if changed
+    if (dto.destinationId) {
+      const destination = await this.prisma.destination.findFirst({
+        where: {
+          id: dto.destinationId,
+          tenantId,
+        },
+      });
+
+      if (!destination) {
+        throw new BadRequestException("Invalid destination");
+      }
+    }
+
     const updated = this.prisma.package.update({
       where: { id: pkg.id },
       data: {
@@ -279,6 +293,7 @@ export class PackagesService {
         priceFrom: dto.priceFrom,
         overview: dto.overview,
         status: dto.status,
+        destinationId: dto.destinationId,
         highlights: dto.highlights,
         inclusions: dto.inclusions,
         exclusions: dto.exclusions,
