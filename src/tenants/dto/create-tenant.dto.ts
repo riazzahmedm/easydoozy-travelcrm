@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
 
 export class CreateTenantDto {
@@ -25,10 +25,12 @@ export class CreateTenantDto {
   @MinLength(6)
   adminPassword: string;
 
+  @ApiPropertyOptional({ example: "https://cdn.site.com/logo.png" })
   @IsOptional()
   @IsString()
   logo?: string;
 
+  @ApiPropertyOptional({ example: "#0f172a" })
   @IsOptional()
   @IsString()
   color?: string;

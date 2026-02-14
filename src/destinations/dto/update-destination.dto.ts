@@ -3,32 +3,32 @@ import { IsArray, IsEnum, IsOptional, IsString } from "class-validator";
 import { ContentStatus } from "@prisma/client";
 
 export class UpdateDestinationDto {
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: "India" })
   @IsOptional()
   @IsString()
   country?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: "Goa" })
   @IsOptional()
   @IsString()
   city?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: "North Goa" })
   @IsOptional()
   @IsString()
   name?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: "Beach destination popular for holidays." })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ enum: ContentStatus })
+  @ApiPropertyOptional({ enum: ContentStatus, example: ContentStatus.PUBLISHED })
   @IsOptional()
   @IsEnum(ContentStatus)
   status?: ContentStatus;
 
-  @ApiPropertyOptional({ type: [String] })
+  @ApiPropertyOptional({ type: [String], example: ["tag-uuid-1", "tag-uuid-2"] })
   @IsOptional()
   @IsArray()
   tagIds?: string[];

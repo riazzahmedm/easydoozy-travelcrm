@@ -23,17 +23,17 @@ export class CreateDestinationDto {
   @IsNotEmpty()
   slug: string;
 
-  @ApiProperty({ required: false })
+  @ApiPropertyOptional({ example: "Beach destination popular for holidays." })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ enum: ContentStatus })
+  @ApiPropertyOptional({ enum: ContentStatus, example: ContentStatus.DRAFT })
   @IsOptional()
   @IsEnum(ContentStatus)
   status?: ContentStatus;
 
-  @ApiPropertyOptional({ type: [String] })
+  @ApiPropertyOptional({ type: [String], example: ["tag-uuid-1", "tag-uuid-2"] })
   @IsOptional()
   @IsArray()
   tagIds?: string[];

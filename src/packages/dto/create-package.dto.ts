@@ -13,12 +13,15 @@ import { ContentStatus } from "@prisma/client";
 import { Type } from "class-transformer";
 
 class CreateItineraryDayDto {
+  @ApiProperty({ example: 1 })
   @IsInt()
   dayNumber: number;
 
+  @ApiProperty({ example: "Arrival and transfer" })
   @IsString()
   title: string;
 
+  @ApiProperty({ example: "Pickup from airport and hotel check-in." })
   @IsString()
   description: string;
 }
@@ -43,24 +46,24 @@ export class CreatePackageDto {
   @IsNumber()
   priceFrom: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: "Best-selling honeymoon package in Goa." })
   @IsOptional()
   @IsString()
   overview?: string;
 
-  @ApiPropertyOptional({ type: [String] })
+  @ApiPropertyOptional({ type: [String], example: ["Beach stay", "Private cab"] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   highlights?: string[];
 
-  @ApiPropertyOptional({ type: [String] })
+  @ApiPropertyOptional({ type: [String], example: ["Breakfast", "Airport transfer"] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   inclusions?: string[];
 
-  @ApiPropertyOptional({ type: [String] })
+  @ApiPropertyOptional({ type: [String], example: ["Lunch", "Personal expenses"] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
@@ -78,12 +81,12 @@ export class CreatePackageDto {
   @IsNotEmpty()
   destinationId: string;
 
-  @ApiPropertyOptional({ enum: ContentStatus })
+  @ApiPropertyOptional({ enum: ContentStatus, example: ContentStatus.DRAFT })
   @IsOptional()
   @IsEnum(ContentStatus)
   status?: ContentStatus;
 
-  @ApiPropertyOptional({ type: [String] })
+  @ApiPropertyOptional({ type: [String], example: ["tag-uuid-1", "tag-uuid-2"] })
   @IsOptional()
   @IsArray()
   tagIds?: string[];

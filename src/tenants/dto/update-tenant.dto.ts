@@ -1,24 +1,24 @@
 
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiPropertyOptional } from "@nestjs/swagger";
 import { IsEmail, IsOptional, IsString } from "class-validator";
 
 export class UpdateTenantDto {
-  @ApiProperty({ example: "https://.." })
+  @ApiPropertyOptional({ example: "https://cdn.site.com/logo.png" })
   @IsOptional()
   @IsString()
   logo?: string;
 
-  @ApiProperty({ example: "#000" })
+  @ApiPropertyOptional({ example: "#0f172a" })
   @IsOptional()
   @IsString()
   color?: string;
 
-  @ApiProperty({ example: "John Doe" })
+  @ApiPropertyOptional({ example: "John Doe" })
   @IsOptional()
   @IsString()
   adminName?: string;
 
-  @ApiProperty({ example: "johndoe@abc.com" })
+  @ApiPropertyOptional({ example: "johndoe@abc.com" })
   @IsOptional()
   @IsEmail()
   adminEmail?: string;
