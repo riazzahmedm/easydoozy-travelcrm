@@ -8,14 +8,25 @@ import { UpdateLeadDto } from './dto/update-lead.dto';
 export class LeadsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreateLeadDto, tenantId: string) {
-    return this.prisma.lead.create({
-      data: {
-        ...dto,
-        tenantId,
-      },
-    });
-  }
+ async create(dto: CreateLeadDto, tenantId: string) {
+  return this.prisma.lead.create({
+    data: {
+      name: dto.name,
+      email: dto.email,
+      phone: dto.phone,
+      travelDate: dto.travelDate
+        ? new Date(dto.travelDate)
+        : undefined,
+      travelers: dto.travelers,
+      budget: dto.budget,
+      source: dto.source,
+      notes: dto.notes,
+      status: dto.status,
+      tenantId,
+    },
+  });
+}
+
 
   async findAll(
     tenantId: string,
