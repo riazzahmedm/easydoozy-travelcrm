@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
 
 export class CreateTenantDto {
   @ApiProperty({ example: "Tiger Holidays" })
@@ -24,4 +24,12 @@ export class CreateTenantDto {
   @ApiProperty({ example: "Admin@123" })
   @MinLength(6)
   adminPassword: string;
+
+  @IsOptional()
+  @IsString()
+  logo?: string;
+
+  @IsOptional()
+  @IsString()
+  color?: string;
 }

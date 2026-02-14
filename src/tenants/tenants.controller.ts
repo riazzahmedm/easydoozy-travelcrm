@@ -15,6 +15,7 @@ import { AuthGuard } from "@nestjs/passport";
 import { UserRole } from "@prisma/client";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { Roles } from "src/common/decorators/roles.decorator";
+import { UpdateTenantDto } from "./dto/update-tenant.dto";
 
 @ApiTags("Tenants")
 @ApiCookieAuth()
@@ -22,7 +23,7 @@ import { Roles } from "src/common/decorators/roles.decorator";
 @Roles(UserRole.SUPER_ADMIN)
 @Controller("tenants")
 export class TenantsController {
-  constructor(private tenantsService: TenantsService) {}
+  constructor(private tenantsService: TenantsService) { }
 
   @Post()
   createTenant(@Body() dto: CreateTenantDto) {
@@ -39,6 +40,14 @@ export class TenantsController {
     return this.tenantsService.findTenantById(tenantId);
   }
 
+  @Patch(":id")
+  updateTenant(
+    @Param("id") tenantId: string,
+    @Body() dto: UpdateTenantDto
+  ) {
+    return this.tenantsService.updateTenant(tenantId, dto);
+  }
+
   @Patch(":id/status")
   updateStatus(
     @Param("id") tenantId: string,
@@ -46,4 +55,6 @@ export class TenantsController {
   ) {
     return this.tenantsService.updateTenantStatus(tenantId, dto.status);
   }
+
+
 }
