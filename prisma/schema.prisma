@@ -27,6 +27,7 @@ model Tenant {
   destinations Destination[]
   packages     Package[]
   tags         Tag[]
+  leads        Lead[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -46,6 +47,7 @@ model User {
 
   resetTokenHash String?
   resetTokenExp  DateTime?
+  assignedLeads  Lead[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -70,6 +72,7 @@ model Destination {
 
   tags     Tag[]
   packages Package[]
+  leads    Lead[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -102,7 +105,8 @@ model Package {
 
   itinerary ItineraryDay[]
 
-  tags Tag[]
+  tags  Tag[]
+  leads Lead[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -198,6 +202,42 @@ model TenantSubscription {
   updatedAt DateTime @updatedAt
 }
 
+model Lead {
+  id       String @id @default(uuid())
+  tenantId String
+
+  name  String
+  email String?
+  phone String?
+
+  travelDate DateTime?
+  travelers  Int?
+  budget     Int?
+
+  source String?
+
+  status LeadStatus @default(NEW)
+
+  destinationId String?
+  destination   Destination? @relation(fields: [destinationId], references: [id])
+
+  packageId String?
+  package   Package? @relation(fields: [packageId], references: [id])
+
+  assignedToId String?
+  assignedTo   User?   @relation(fields: [assignedToId], references: [id])
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([status])
+}
+
 enum UserRole {
   SUPER_ADMIN
   TENANT_ADMIN
@@ -224,4 +264,12 @@ enum SubscriptionStatus {
   TRIAL
   EXPIRED
   SUSPENDED
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  WON
+  LOST
 }

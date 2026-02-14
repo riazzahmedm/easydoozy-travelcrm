@@ -17,10 +17,13 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { TenantDashboardModule } from './tenant-dashboard/tenant-dashboard.module';
 import { PlatformDashboardService } from './platform-dashboard/platform-dashboard.service';
 import { PlatformDashboardModule } from './platform-dashboard/platform-dashboard.module';
+import { LeadsService } from './leads/leads.service';
+import { LeadsController } from './leads/leads.controller';
+import { LeadsModule } from './leads/leads.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, TenantsModule, DestinationsModule, UsersModule, PackagesModule, TagsModule, PlansModule, SubscriptionsModule, TenantDashboardModule, PlatformDashboardModule],
-  controllers: [AppController, PlansController, SubscriptionsController],
-  providers: [AppService, PlansService, SubscriptionsService, PlatformDashboardService],
+  imports: [PrismaModule, AuthModule, TenantsModule, DestinationsModule, UsersModule, PackagesModule, TagsModule, PlansModule, SubscriptionsModule, TenantDashboardModule, PlatformDashboardModule, LeadsModule],
+  controllers: [AppController, PlansController, SubscriptionsController, LeadsController],
+  providers: [AppService, PlansService, SubscriptionsService, PlatformDashboardService, LeadsService],
 })
 export class AppModule {}
