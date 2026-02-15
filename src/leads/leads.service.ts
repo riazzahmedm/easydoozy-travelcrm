@@ -6,26 +6,29 @@ import { UpdateLeadDto } from './dto/update-lead.dto';
 
 @Injectable()
 export class LeadsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
- async create(dto: CreateLeadDto, tenantId: string) {
-  return this.prisma.lead.create({
-    data: {
-      name: dto.name,
-      email: dto.email,
-      phone: dto.phone,
-      travelDate: dto.travelDate
-        ? new Date(dto.travelDate)
-        : undefined,
-      travelers: dto.travelers,
-      budget: dto.budget,
-      source: dto.source,
-      notes: dto.notes,
-      status: dto.status,
-      tenantId,
-    },
-  });
-}
+  async create(dto: CreateLeadDto, tenantId: string) {
+    return this.prisma.lead.create({
+      data: {
+        name: dto.name,
+        email: dto.email,
+        phone: dto.phone,
+        travelDate: dto.travelDate
+          ? new Date(dto.travelDate)
+          : undefined,
+        travelers: dto.travelers,
+        budget: dto.budget,
+        source: dto.source,
+        notes: dto.notes,
+        status: dto.status,
+        assignedToId: dto.assignedToId,
+        destinationId: dto.destinationId,
+        packageId: dto.packageId,
+        tenantId,
+      },
+    });
+  }
 
 
   async findAll(
@@ -96,18 +99,12 @@ export class LeadsService {
 
     return this.prisma.lead.update({
       where: { id: lead.id },
-      data: dto,
-    });
-  }
-
-  async assign(
-    id: string,
-    assignedToId: string,
-    tenantId: string
-  ) {
-    return this.prisma.lead.update({
-      where: { id },
-      data: { assignedToId },
+      data: {
+        ...dto,
+        travelDate: dto.travelDate
+          ? new Date(dto.travelDate)
+          : undefined,
+      },
     });
   }
 

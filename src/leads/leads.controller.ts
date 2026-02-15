@@ -7,7 +7,6 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 import { LeadsService } from './leads.service';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
-import { AssignLeadDto } from './dto/assign-lead.dto';
 import { UpdateLeadStatusDto } from './dto/update-status.dto';
 
 @ApiTags("Leads")
@@ -57,20 +56,6 @@ export class LeadsController {
       req.user.tenantId,
       req.user.role,
       req.user.id
-    );
-  }
-
-  @Patch(":id/assign")
-  @Roles(UserRole.TENANT_ADMIN)
-  assign(
-    @Param("id") id: string,
-    @Body() dto: AssignLeadDto,
-    @Req() req
-  ) {
-    return this.leadsService.assign(
-      id,
-      dto.assignedToId,
-      req.user.tenantId
     );
   }
 

@@ -20,8 +20,7 @@ export class CreateLeadDto {
   @IsEmail()
   email?: string;
 
-  @ApiPropertyOptional({ example: "+919999999999" })
-  @IsOptional()
+  @ApiProperty({ example: "+919999999999" })
   @IsString()
   phone?: string;
 
@@ -54,6 +53,11 @@ export class CreateLeadDto {
   @IsOptional()
   @IsUUID()
   packageId?: string;
+
+  @ApiPropertyOptional({ example: "" })
+  @IsOptional()
+  @IsUUID()
+  assignedToId: string;
 
   @ApiPropertyOptional({ example: "Looking for family-friendly itinerary." })
   @IsOptional()

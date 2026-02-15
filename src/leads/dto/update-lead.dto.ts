@@ -56,6 +56,11 @@ export class UpdateLeadDto {
   @IsUUID()
   packageId?: string;
 
+  @ApiPropertyOptional({ example: "" })
+  @IsOptional()
+  @IsUUID()
+  assignedToId: string;
+
   @ApiPropertyOptional({ example: "Customer requested hotel upgrade." })
   @IsOptional()
   @IsString()
